@@ -41,8 +41,9 @@ const cardStyle = {
   border: "1px solid #fed7aa",
 }
 
+// インプットスタイル（回答欄）
 const inputStyle = {
-    width: "calc(100% - 24px)", // 横幅を調整（24px は左右の padding 分）
+    width: "calc(100%)",
     padding: "12px",
     fontSize: "1rem",
     borderRadius: "8px",
@@ -117,16 +118,7 @@ function AnagramGame() {
 
   useEffect(() => {
     const sampleTitles = [
-      "りんご",
-      "みかん",
-      "ばなな",
-      "ぶどう",
-      "めろん",
-      "いちご",
-      "もも",
-      "さくらんぼ",
-      "きうい",
-      "ぱいなっぷる",
+      "Error：うまく問題が取得できていません"
     ]
 
     fetch("/titles.json")
@@ -174,7 +166,7 @@ function AnagramGame() {
 
   function copyQuestion() {
     navigator.clipboard.writeText(question)
-    alert("問題をコピーしました！")
+    setHint("問題をコピーしました！")
   }
 
   function handleKeyDown(e) {
@@ -237,7 +229,7 @@ function AnagramGame() {
         </h3>
         <textarea
           name="comment"
-          placeholder="ここにメモを入力してください"
+          placeholder="メモ欄としてご自由にお使いください"
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           style={{

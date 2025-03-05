@@ -1,17 +1,3 @@
-// import React from "react";
-// import AnagramGame from "./components/AnagramGame";
-
-// function App() {
-//   return (
-//     <div style={{ textAlign: "center", fontFamily: "Arial", padding: "20px" }}>
-//       <h1>アナグラムゲーム</h1>
-//       <AnagramGame />
-//     </div>
-//   );
-// }
-
-// export default App;
-
 import AnagramGame from "./components/AnagramGame"
 
 function App() {
