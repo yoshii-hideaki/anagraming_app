@@ -31,6 +31,36 @@ const secondaryButtonStyle = {
   border: "1px solid #fdba74",
 }
 
+const addHoverEffect_primary = (e) => {
+    e.target.style.backgroundColor = "#f97316"
+    e.target.style.transform = "translateY(-2px)"
+  }
+  
+const removeHoverEffect_primary = (e) => {
+e.target.style.backgroundColor = "#ea580c"
+e.target.style.transform = "translateY(0)"
+}
+
+const addHoverEffect_secondary = (e) => {
+    e.target.style.backgroundColor = "#f3f4f6"
+    e.target.style.transform = "translateY(-2px)"
+  }
+  
+const removeHoverEffect_secondary = (e) => {
+e.target.style.backgroundColor = "white"
+e.target.style.transform = "translateY(0)"
+}
+
+const addHoverEffect_end = (e) => {
+    e.target.style.backgroundColor = "#dc2626"
+    e.target.style.transform = "translateY(-2px)"
+  }
+  
+const removeHoverEffect_end = (e) => {
+e.target.style.backgroundColor = "#ef4444"
+e.target.style.transform = "translateY(0)"
+}
+
 // カードスタイル
 const cardStyle = {
   backgroundColor: "white",
@@ -107,7 +137,7 @@ function shuffleWord(word) {
     .join("")
 }
 
-function AnagramGame() {
+function AnagramGame({ mode, onGameEnd }) {
   const [titles, setTitles] = useState([])
   const [answer, setAnswer] = useState("")
   const [question, setQuestion] = useState("")
@@ -120,8 +150,10 @@ function AnagramGame() {
     const sampleTitles = [
       "Error：うまく問題が取得できていません"
     ]
-
-    fetch("/titles.json")
+  
+    const titlesFile = mode === "anime" ? "/anime_titles.json" : mode === "game" ? "/game_titles.json" : mode === "country" ? "/country_names.json" : "/error.json";
+  
+    fetch(titlesFile)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -136,7 +168,7 @@ function AnagramGame() {
         setTitles(sampleTitles)
         startNewGame(sampleTitles)
       })
-  }, [])
+  }, [mode])
 
   function startNewGame(currentTitles = titles) {
     if (!currentTitles || currentTitles.length === 0) return
@@ -176,74 +208,109 @@ function AnagramGame() {
   }
 
   return (
-    <div>
-      {/* 問題カード */}
-      <div style={cardStyle}>
-        <div style={questionStyle}>
-          <span style={{ opacity: 0.7, marginRight: "10px", fontSize: "1rem" }}>【問題】</span>
-          {question}
+    <div
+        style={{
+        textAlign: "center",
+        fontFamily: "Arial, sans-serif",
+        padding: "20px",
+        background: "linear-gradient(to bottom, #fff7ed, #ffedd5)",
+        minHeight: "100vh",
+        color: "#9a3412",
+        }}
+    >
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+        <h1
+            style={{
+            color: "#c2410c",
+            fontSize: "2.5rem",
+            marginBottom: "0.5rem",
+            textShadow: "1px 1px 2px rgba(0,0,0,0.1)",
+            }}
+        >
+            アナグラムゲーム
+        </h1>
+        <p
+            style={{
+            color: "#ea580c",
+            marginBottom: "2rem",
+            fontSize: "1.1rem",
+            }}
+        >
+            単語を並べ替えて元の言葉を当てよう！
+        </p>
+            <div>
+            {/* 問題カード */}
+            <div style={cardStyle}>
+                <div style={questionStyle}>
+                <span style={{ opacity: 0.7, marginRight: "10px", fontSize: "1rem" }}>【問題】</span>
+                {question}
+                </div>
+
+                <input
+                type="text"
+                placeholder="ここに回答を入力してください"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={inputStyle}
+                />
+
+                {result === "correct" && <div style={successAlertStyle}>正解！おめでとうございます！</div>}
+
+                {result === "incorrect" && <div style={errorAlertStyle}>残念、不正解です。もう一度挑戦してみましょう。</div>}
+
+                {hint && (
+                <div style={hintAlertStyle}>
+                    <span style={{ fontWeight: "bold" }}></span> {hint}
+                </div>
+                )}
+
+                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px" }}>
+                <button onClick={checkAnswer} onMouseEnter={addHoverEffect_primary} onMouseLeave={removeHoverEffect_primary} style={primaryButtonStyle}>
+                    回答をチェック
+                </button>
+                <button onClick={() => startNewGame(titles)} onMouseEnter={addHoverEffect_secondary} onMouseLeave={removeHoverEffect_secondary} style={secondaryButtonStyle}>
+                    次の問題
+                </button>
+                <button onClick={showHint} onMouseEnter={addHoverEffect_secondary} onMouseLeave={removeHoverEffect_secondary} style={secondaryButtonStyle}>
+                    ヒントを表示
+                </button>
+                <button onClick={showAnswer} onMouseEnter={addHoverEffect_secondary} onMouseLeave={removeHoverEffect_secondary} style={secondaryButtonStyle}>
+                    答えを表示
+                </button>
+                <button onClick={copyQuestion} onMouseEnter={addHoverEffect_secondary} onMouseLeave={removeHoverEffect_secondary} style={secondaryButtonStyle}>
+                    問題をコピー
+                </button>
+                <button onClick={onGameEnd} onMouseEnter={addHoverEffect_end} onMouseLeave={removeHoverEffect_end} style={{ backgroundColor: "#ef4444", color: "white", padding: "10px 20px", borderRadius: "8px", border: "none", cursor: "pointer" }}>
+                    ゲーム終了
+                </button>
+                </div>
+            </div>
+
+            {/* メモカード */}
+            <div style={cardStyle}>
+                <h3 style={{ color: "#c2410c", marginTop: 0, marginBottom: "15px", fontSize: "1.2rem" }}>
+                メモ
+                </h3>
+                <textarea
+                name="comment"
+                placeholder="メモ欄としてご自由にお使いください"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                style={{
+                    width: "100%",
+                    minHeight: "200px",
+                    padding: "12px",
+                    fontSize: "1rem",
+                    borderRadius: "8px",
+                    border: "1px solid #fdba74",
+                    boxSizing: "border-box",
+                    resize: "vertical",
+                }}
+                />
+            </div>
+            </div>
         </div>
-
-        <input
-          type="text"
-          placeholder="ここに回答を入力してください"
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          style={inputStyle}
-        />
-
-        {result === "correct" && <div style={successAlertStyle}>正解！おめでとうございます！</div>}
-
-        {result === "incorrect" && <div style={errorAlertStyle}>残念、不正解です。もう一度挑戦してみましょう。</div>}
-
-        {hint && (
-          <div style={hintAlertStyle}>
-            <span style={{ fontWeight: "bold" }}></span> {hint}
-          </div>
-        )}
-
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px" }}>
-          <button onClick={checkAnswer} style={primaryButtonStyle}>
-            回答をチェック
-          </button>
-          <button onClick={() => startNewGame(titles)} style={secondaryButtonStyle}>
-            次の問題
-          </button>
-          <button onClick={showHint} style={secondaryButtonStyle}>
-            ヒントを表示
-          </button>
-          <button onClick={showAnswer} style={secondaryButtonStyle}>
-            答えを表示
-          </button>
-          <button onClick={copyQuestion} style={secondaryButtonStyle}>
-            問題をコピー
-          </button>
-        </div>
-      </div>
-
-      {/* メモカード */}
-      <div style={cardStyle}>
-        <h3 style={{ color: "#c2410c", marginTop: 0, marginBottom: "15px", fontSize: "1.2rem" }}>
-          メモ
-        </h3>
-        <textarea
-          name="comment"
-          placeholder="メモ欄としてご自由にお使いください"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-          style={{
-            width: "100%",
-            minHeight: "200px",
-            padding: "12px",
-            fontSize: "1rem",
-            borderRadius: "8px",
-            border: "1px solid #fdba74",
-            boxSizing: "border-box",
-            resize: "vertical",
-          }}
-        />
-      </div>
     </div>
   )
 }
