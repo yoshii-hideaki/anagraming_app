@@ -130,12 +130,24 @@ const questionStyle = {
   letterSpacing: "2px",
 }
 
-function shuffleWord(word) {
-  return word
-    .split("")
-    .sort(() => Math.random() - 0.5)
-    .join("")
+const scoreStyle = {
+  padding: "15px",
+  fontSize: "3rem",
+  fontWeight: "bold",
+  color: "#9a3412",
+  marginBottom: "20px",
+  letterSpacing: "2px",
 }
+
+function shuffleWord(word) {
+  let array = word.split("");
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1)); // 0 から i の範囲でランダム
+    [array[i], array[j]] = [array[j], array[i]]; // 要素を交換
+  }
+  return array.join("");
+}
+
 
 function AnagramGame({ mode, onGameEnd }) {
   const [titles, setTitles] = useState([])
@@ -145,6 +157,8 @@ function AnagramGame({ mode, onGameEnd }) {
   const [hint, setHint] = useState("")
   const [result, setResult] = useState(null) // "correct", "incorrect", null
   const [memo, setMemo] = useState("")
+  const [score, setScore] = useState(0)
+  const [tmpscore, setTmpscore] = useState(0)
 
   useEffect(() => {
     const sampleTitles = [
@@ -171,20 +185,40 @@ function AnagramGame({ mode, onGameEnd }) {
   }, [mode])
 
   function startNewGame(currentTitles = titles) {
-    if (!currentTitles || currentTitles.length === 0) return
-    const selectedWord = currentTitles[Math.floor(Math.random() * currentTitles.length)]
+    if (currentTitles.length === 0) {
+      setHint(`全ての問題が出題されました`)
+      return;
+    }
+  
+    // 未出題の中からランダムに1問選ぶ
+    const randomIndex = Math.floor(Math.random() * currentTitles.length)
+    const selectedWord = currentTitles[randomIndex]
+  
     setAnswer(selectedWord)
     setQuestion(shuffleWord(selectedWord))
     setUserInput("")
     setHint("")
     setResult(null)
+  
+    // 出題済みの問題を削除
+    setTitles(currentTitles.filter((_, index) => index !== randomIndex))
+    setTmpscore(selectedWord.length * 100)
   }
+  
 
   function checkAnswer() {
     if (userInput === answer) {
+      setScore(score + tmpscore)
+      startNewGame(titles)
       setResult("correct")
+      setUserInput("")
     } else {
       setResult("incorrect")
+      if (score - tmpscore / 10 > 0) {
+        setScore(score - tmpscore / 10)
+      } else {
+        setScore(0)
+      }
     }
   }
 
@@ -201,6 +235,7 @@ function AnagramGame({ mode, onGameEnd }) {
     setHint("問題をコピーしました！")
   }
 
+  // エンターキーで判定
   function handleKeyDown(e) {
     if (e.key === "Enter") {
       checkAnswer()
@@ -251,7 +286,7 @@ function AnagramGame({ mode, onGameEnd }) {
                 placeholder="ここに回答を入力してください"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={handleKeyDown}
+                // onKeyDown={handleKeyDown}
                 style={inputStyle}
                 />
 
@@ -285,6 +320,14 @@ function AnagramGame({ mode, onGameEnd }) {
                     ゲーム終了
                 </button>
                 </div>
+            </div>
+
+            {/* スコア表示 */}
+            <div style={cardStyle}>
+                <h3 style={{ color: "#c2410c", marginTop: 0, marginBottom: "15px", fontSize: "1.2rem" }}>
+                スコア
+                </h3>
+                <div style={scoreStyle}>{score}</div>
             </div>
 
             {/* メモカード */}
